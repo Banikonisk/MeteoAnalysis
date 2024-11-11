@@ -2,7 +2,50 @@ import requests
 import pandas as pd
 import time
 import sys
-from helper_functions import convert_to_df, validate_dates
+
+
+def convert_to_df(data, index_name):
+    """Convert JSON data to DataFrame, set index, change time zone.
+    Args:
+        data (list): retrieved JSON data from API
+        index_name (str): Timestamp name in Meteo API (observationTimeUtc|forecastTimeUtc)
+    Returns:
+        data (pd.DataFrame): converted data to DataFrame format
+    """
+    df = pd.DataFrame(data)
+    df['time'] = pd.to_datetime(df[f"{index_name}"]).dt.tz_localize('UTC')
+    df['time'] = df['time'].dt.tz_convert('Etc/GMT-2')
+    df.set_index('time', inplace=True)
+    df.drop(f"{index_name}", axis=1, inplace=True)
+    return df
+
+
+def validate_dates(start_date, end_date):
+    """Validate input for start and end dates.
+    Args:
+        start_date (str): start of interval for collecting data
+        end_date (str): end of interval for collecting data
+    Returns:
+        True, if dates are valid
+        False, if dates are not valid
+    """
+    try:
+        start_date = pd.to_datetime(start_date).date()
+        end_date = pd.to_datetime(end_date).date()
+    except Exception as e:
+        print(f"Error: {e}")
+        return False
+    if start_date >= end_date:
+        print("Error: start date must be earlier than end date")
+        return False
+    today = pd.Timestamp.today().normalize().date()
+    if start_date >= today:
+        print("Error: start date must be earlier than today")
+        return False
+    if end_date > today:
+        print("Error: end date must not be later than today")
+        return False
+    return True
 
 
 class MeteoAPI:
@@ -54,8 +97,7 @@ class MeteoAPI:
         date_list = [date.strftime('%Y-%m-%d') for date in pd.date_range(
             pd.to_datetime(start_date) - pd.Timedelta(days=1), end_date, freq='D')]
         for date in date_list:
-            full_url = f"{
-                self.url}stations/{self.station_code}/observations/{date}"
+            full_url = f"{self.url}stations/{self.station_code}/observations/{date}"
             single_day_data = self.get_request(full_url, "observations")
             data.extend(single_day_data)
         df = convert_to_df(data, "observationTimeUtc")
