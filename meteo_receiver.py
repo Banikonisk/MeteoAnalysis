@@ -2,10 +2,10 @@ import sys
 
 
 class MeteoReceiver:
-    """Calculates various metrics with Meteo API data"""
+    """Fetches data from Meteo API"""
 
     def __init__(self, meteo_api, start_date, end_date):
-        """Initializes MeteoReceiver object and fetches data from API.
+        """Initializes MeteoReceiver object.
         Args:
             meteo_api (MeteoAPI): API to retrieve data from
             start_date (str): start of interval for collecting data
@@ -43,11 +43,11 @@ class MeteoReceiver:
             sys.exit(3)
 
     def get_hist_metric(self, metric):
-        """Get specific metric from historical df
+        """Get series from historical dataframe.
         Args:
             metric (str): weather metric, refer to Meteo API
         Returns:
-            data (pd.Series): specific metric of historical df
+            data (pd.Series): series of metric
         """
         try:
             data = self.hist_data[f"{metric}"]
@@ -57,11 +57,11 @@ class MeteoReceiver:
             sys.exit(2)
 
     def get_forecast_metric(self, metric):
-        """Get specific metric from forecast df
+        """Get series from forecasted dataframe.
         Args:
             metric (str): weather metric, refer to Meteo API
         Returns:
-            data (pd.Series): specific metric of forecast df
+            data (pd.Series): series of metric
         """
         try:
             data = self.forecast_data[f"{metric}"]

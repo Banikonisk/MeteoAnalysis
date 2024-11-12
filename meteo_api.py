@@ -70,8 +70,6 @@ class MeteoAPI:
             var_name (str): variable name to extract observations (observations|forecastTimestamps)
         Returns:
             data (list): response data from API in JSON format
-        Raises:
-            requests.RequestException: if exception happens while handling request
         """
         try:
             response = requests.get(full_url)
@@ -84,10 +82,10 @@ class MeteoAPI:
             sys.exit(1)
 
     def get_historical_data(self, start_date, end_date):
-        """Get historical data in specified date range from Meteo API.
+        """Get historical data in date range from Meteo API.
         Args:
-            start_date (str): start of interval for collecting data
-            end_date (str): end of interval for collecting data
+            start_date (str): start of interval
+            end_date (str): end of interval
         Returns:
             df (pd.DataFrame): historical data in specified date range
         """
