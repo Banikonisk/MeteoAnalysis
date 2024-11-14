@@ -50,7 +50,6 @@ def validate_dates(start_date, end_date):
 
 class MeteoAPI:
     """Read historical and forecasted data from Meteo API."""
-    TIME_ZONE = 2
 
     def __init__(self, place_code, station_code, url):
         """Initializes MeteoAPI object.
@@ -99,9 +98,10 @@ class MeteoAPI:
             single_day_data = self.get_request(full_url, "observations")
             data.extend(single_day_data)
         df = convert_to_df(data, "observationTimeUtc")
-        df = df.iloc[24-self.TIME_ZONE:]
-        if df.index[-(self.TIME_ZONE+1)].date() != pd.Timestamp.today().normalize().date():
-            df = df.iloc[:-self.TIME_ZONE]
+        time_zone = int(df.index.tz.utcoffset(df.index).total_seconds() / 3600)
+        df = df.iloc[24-time_zone:]
+        if df.index[-(time_zone+1)].date() != pd.Timestamp.today().normalize().date():
+            df = df.iloc[:time_zone]
         return df
 
     def get_forecast(self):
